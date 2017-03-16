@@ -1,0 +1,12 @@
+{
+    "plugins": ["node"],
+    "extends": [
+        "eslint-config-ambassify/node",
+        "plugin:node/recommended"
+    ],
+    "rules": {
+      "node/exports-style": [ 2, "module.exports" ],
+      "node/no-missing-import": [ 2 ],
+      "node/no-unpublished-import": [ 2 ]
+    }
+}
