@@ -1,7 +1,10 @@
 const qs = require('qs');
 
 function concat(base, path) {
-    return base.replace(/\/*$/, '/') + path.replace(/^\/+/, '');
+    if (base)
+        return base.replace(/\/*$/, '/') + path.replace(/^\/+/, '');
+
+    return path;
 }
 
 function injectQueryParams (uri, parameters, options) {
@@ -16,7 +19,7 @@ function injectQueryParams (uri, parameters, options) {
     const searchIndex = uri.indexOf('?');
     let query = {};
 
-    if (searchIndex) {
+    if (searchIndex >= 0) {
         query = qs.parse(uri.substr(searchIndex + 1));
         uri = uri.substr(0, searchIndex);
     }
