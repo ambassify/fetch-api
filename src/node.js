@@ -25,11 +25,3 @@ class NodeFetchApi extends FetchApi {
 }
 
 module.exports = NodeFetchApi;
-
-class MyError extends Error {}
-
-const e = new MyError('bla');
-console.log(e);
-console.log(e.name);
-console.log(e instanceof MyError);
-console.log(e instanceof Error);
