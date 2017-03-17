@@ -152,7 +152,7 @@ FetchApi.defineContentType = (name, config) => {
     }
 
     FetchApi.ContentTypes[name] = config.type;
-    serializers[config.type] = config.serializers;
+    serializers[config.type] = config.serializer;
 };
 
 module.exports = FetchApi;
