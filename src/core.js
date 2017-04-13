@@ -47,7 +47,11 @@ class FetchApi {
     }
 
     _request(url, options) {
-        return this.fetch(url, options)
+        // Chrome gives strange "Illegal Invocation" errors when window.fetch
+        // is assigned to an object and called like this.fetch.
+        const _fetch = this.fetch;
+
+        return _fetch(url, options)
             .catch(cause => this._error(0, url, { cause }))
             .then(this._respond);
     }
