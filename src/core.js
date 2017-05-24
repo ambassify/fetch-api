@@ -1,8 +1,6 @@
 const { FetchApiError, RequestFailedError } = require('./error');
 const { concat, injectQueryParams } = require('./url');
-const pkg = require('../package.json');
 
-const USERAGENT = `${pkg.name}@${pkg.version}`;
 const serializers = {};
 
 class FetchApi {
@@ -16,7 +14,6 @@ class FetchApi {
         this.baseUrl = baseUrl;
 
         this.headers = headers || {};
-        this.headers['user-agent'] = this.headers['user-agent'] || USERAGENT;
         this.headers['content-type'] = this.headers['content-type'] || contentType;
 
         this.request = this.request.bind(this);
