@@ -1,8 +1,7 @@
 {
     "plugins": ["node"],
     "extends": [
-        "eslint-config-ambassify/node",
-        "plugin:node/recommended"
+        "eslint-config-ambassify/node"
     ],
     "rules": {
       "node/exports-style": [ 2, "module.exports" ],
