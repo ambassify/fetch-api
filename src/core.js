@@ -2,16 +2,78 @@ const { FetchApiError, RequestFailedError } = require('./error');
 const { concat, injectQueryParams } = require('./url');
 
 const serializers = {};
+const deserializers = [];
+
+function defineDeserializer(on, matcher, deserialize) {
+    if (typeof matcher == 'string') {
+        const str = matcher;
+
+        if (str.indexOf(';') > -1)
+            matcher = contentType => contentType == str;
+        else if (typeof str == 'string')
+            matcher = contentType => (contentType || '').split(';').shift() == str;
+    }
+
+    if (typeof matcher !== 'function')
+        throw new FetchApiError('ResponseType matcher needs to be a function');
+
+    if (typeof deserialize !== 'function')
+        throw new FetchApiError('ResponseType deserialize needs to be a function');
+
+    on.unshift({ matcher, deserialize });
+}
+
+/**
+ * Default JSON response parser
+ * application/json
+ * application/(*)+json
+ */
+defineDeserializer(
+    deserializers,
+    s => /^application\/([^+]+\+)?json/.test(s),
+    res => res.json()
+);
+
+/**
+ * Default text response parser
+ * text/*
+ */
+defineDeserializer(
+    deserializers,
+    s => /^text\//.test(s),
+    res => res.text()
+);
+
+function transformResponse(res) {
+    return {
+        type: res.type,
+        url: res.url,
+        redirected: res.redirected,
+        ok: res.ok,
+        status: res.status,
+        statusText: res.statusText,
+        headers: res.headers
+    };
+}
 
 class FetchApi {
     constructor(options = {}) {
-        const { fetch, baseUrl, headers, contentType } = options;
+        const {
+            fetch,
+            baseUrl,
+            headers,
+            contentType,
+            deserialize = true,
+        } = options;
 
         if (!fetch)
             throw new FetchApiError('FetchApi requires fetch');
 
         this.fetch = fetch;
         this.baseUrl = baseUrl;
+
+        this.deserialize = deserialize;
+        this._deserializers = [];
 
         this.headers = headers || {};
         this.headers['content-type'] = this.headers['content-type'] || contentType;
@@ -49,18 +111,44 @@ class FetchApi {
         const _fetch = this.fetch;
 
         return _fetch(url, options)
-            .catch(cause => this._error(0, url, { cause }))
+            .catch(cause => this._error(false, url, {
+                message: cause.message,
+                type: cause.type,
+                errno: cause.errno,
+                code: cause.code
+            }))
             .then(this._respond);
     }
 
     _respond(res) {
-        if (res.ok)
-            return Promise.resolve(res);
+        let deserializing = false;
+        let bodyPromise = Promise.resolve();
 
-        return res.text().then(
-            response => this._error(res.status, res.url, { response }),
-            cause => this._error(res.status, res.url, { cause })
-        );
+        if (this.deserialize && res.status != 204) {
+            const contentType = res.headers.get('content-type') || '';
+            const deserializer = (
+                this._deserializers.filter(d => d.matcher(contentType))[0] ||
+                deserializers.filter(d => d.matcher(contentType))[0]
+            );
+
+            if (deserializer) {
+                deserializing = true;
+                bodyPromise = bodyPromise.then(() => deserializer.deserialize(res));
+                res = transformResponse(res);
+            }
+        }
+
+        return bodyPromise
+            .catch(cause => this._error(false, res.url, { cause, response: res }))
+            .then(body => {
+                if (deserializing)
+                    res.body = body;
+
+                if (!res.ok)
+                    this._error(res.status, res.url, ({ response: res }));
+
+                return res;
+            });
     }
 
     _error(status, url, extra) {
@@ -77,6 +165,10 @@ class FetchApi {
 
     _getNextOptions(previous/* , response */) {
         return previous;
+    }
+
+    defineDeserializer(matcher, deserializer) {
+        defineDeserializer(this._deserializers, matcher, deserializer);
     }
 
     isAbsolute(url) {
@@ -154,6 +246,10 @@ FetchApi.defineContentType = (name, config) => {
 
     FetchApi.ContentTypes[name] = config.type;
     serializers[config.type] = config.serializer;
+};
+
+FetchApi.defineDeserializer = (matcher, deserializer) => {
+    defineDeserializer(deserializers, matcher, deserializer);
 };
 
 module.exports = FetchApi;
