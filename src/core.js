@@ -120,12 +120,13 @@ class FetchApi {
             .then(this._respond);
     }
 
-    _respond(res) {
+    _respond(fetchRes) {
+        let response = fetchRes;
         let deserializing = false;
         let bodyPromise = Promise.resolve();
 
-        if (this.deserialize && res.status != 204) {
-            const contentType = res.headers.get('content-type') || '';
+        if (this.deserialize && response.status != 204) {
+            const contentType = response.headers.get('content-type') || '';
             const deserializer = (
                 this._deserializers.filter(d => d.matcher(contentType))[0] ||
                 deserializers.filter(d => d.matcher(contentType))[0]
@@ -133,21 +134,21 @@ class FetchApi {
 
             if (deserializer) {
                 deserializing = true;
-                bodyPromise = bodyPromise.then(() => deserializer.deserialize(res));
-                res = transformResponse(res);
+                bodyPromise = bodyPromise.then(() => deserializer.deserialize(fetchRes));
+                response = transformResponse(fetchRes);
             }
         }
 
         return bodyPromise
-            .catch(cause => this._error(false, res.url, { cause, response: res }))
+            .catch(cause => this._error(false, response.url, { cause, response }))
             .then(body => {
                 if (deserializing)
-                    res.body = body;
+                    response.body = body;
 
-                if (!res.ok)
-                    this._error(res.status, res.url, ({ response: res }));
+                if (!response.ok)
+                    this._error(response.status, response.url, ({ response }));
 
-                return res;
+                return response;
             });
     }
 
