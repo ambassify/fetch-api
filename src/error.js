@@ -1,4 +1,5 @@
-const Error = require('es6-error');
+// Depending on bundler configuration we might be loading the ES6 version or the CJS version.
+const Error = require('es6-error').default || require('es6-error');
 
 class FetchApiError extends Error {}
 
