@@ -60,6 +60,7 @@ class FetchApi {
     constructor(options = {}) {
         const {
             fetch,
+            fetchOptions = {},
             baseUrl,
             headers,
             contentType,
@@ -70,6 +71,7 @@ class FetchApi {
             throw new FetchApiError('FetchApi requires fetch');
 
         this.fetch = fetch;
+        this.fetchOptions = fetchOptions;
         this.baseUrl = baseUrl;
 
         this.deserialize = deserialize;
@@ -91,7 +93,7 @@ class FetchApi {
 
     _options(...options) {
         const headers = options.map(o => (o || {}).headers);
-        const merged = Object.assign({}, ...options);
+        const merged = Object.assign({}, this.fetchOptions, ...options);
         merged.headers = Object.assign({}, this.headers, ...headers);
         return merged;
     }
