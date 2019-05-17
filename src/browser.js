@@ -1,4 +1,4 @@
-const fetch = require('unfetch/dist/unfetch');
+const fetch = require('@ambassify/fetch');
 const FetchApi = require('./core');
 
 class BrowserFetchApi extends FetchApi {
