@@ -112,7 +112,7 @@ class FetchApi {
         // is assigned to an object and called like this.fetch.
         const _fetch = this.fetch;
 
-        const promise = _fetch(url, options)
+        return _fetch(url, options)
             .catch(cause => this._error(false, url, {
                 message: cause.message,
                 type: cause.type,
@@ -120,10 +120,6 @@ class FetchApi {
                 code: cause.code
             }))
             .then(this._respond);
-
-        promise.body = () => promise.then(res => res.body);
-
-        return promise;
     }
 
     _respond(fetchRes) {
@@ -194,7 +190,10 @@ class FetchApi {
         if (body && !options.body)
             options.body = this._body(body, options);
 
-        return this._request(url, options);
+
+        const promise = this._request(url, options);
+        promise.body = () => promise.then(res => res.body);
+        return promise;
     }
 
     get(url, query, options) {
