@@ -1,6 +1,6 @@
 {
   "name": "@ambassify/fetch-api",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Small class to create easy to use API clients with fetch",
   "engines": {
     "node": ">= 6"
