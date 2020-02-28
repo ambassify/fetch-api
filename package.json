@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/ambassify/fetch-api#readme",
   "dependencies": {
-    "@ambassify/fetch": "^2.1.0",
+    "@ambassify/fetch": "^2.2.0",
     "babel-runtime": "^6.23.0",
     "es6-error": "^4.0.2",
     "qs": "^6.4.0"
