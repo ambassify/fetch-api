@@ -113,4 +113,56 @@ describe('FetchAPI', () => {
         });
     });
 
+    it ('Should retry failed requests', async () => {
+        const responses = [
+            [ 503, { message: 'request failed' }],
+            [ 200, { id: 'hello', name: 'world' }],
+        ];
+
+        nock('https://test.ambassify.eu')
+            .get('/hello-world')
+            .times(2)
+            .reply(() => responses.shift());
+
+        const api = new FetchAPI({
+            baseUrl: 'https://test.ambassify.eu',
+            retry: 3,
+        });
+
+        const resp = await api.get('/hello-world');
+        assert.equal(resp.status, 200);
+        assert.equal(resp.statusText, 'OK');
+        assert.equal(typeof resp.headers, 'object');
+        assert.deepEqual(resp.body, {
+            id: 'hello',
+            name: 'world'
+        });
+    });
+
+    it ('Should not retry invalid requests', async () => {
+        const responses = [
+            [ 400, { message: 'missing parameter' }],
+            [ 200, { id: 'hello', name: 'world' }],
+        ];
+
+        nock('https://test.ambassify.eu')
+            .get('/hello-world')
+            .times(2)
+            .reply(() => responses.shift());
+
+        const api = new FetchAPI({
+            baseUrl: 'https://test.ambassify.eu'
+        });
+
+        const fixt_error = {
+            code: 400,
+            name: 'RequestFailedError',
+            message: 'Request to https://test.ambassify.eu/hello-world failed with status 400'
+        };
+
+        await assert.rejects(async () => {
+            await api.get('/hello-world');
+        }, fixt_error);
+    });
+
 });

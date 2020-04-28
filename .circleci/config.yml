@@ -1,0 +1,22 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: node:12
+        user: node
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - dependencies-{{ checksum "package.json" }}-{{ .Branch }}
+            - dependencies-{{ checksum "package.json" }}-master
+      - run: npm install
+      - save_cache:
+          key: dependencies-{{ checksum "package.json" }}-{{ .Branch }}-{{ .BuildNum }}
+          paths:
+            - node_modules
+      - run: npm test
+      - store_artifacts:
+          path: coverage
+      - store_test_results:
+          path: mocha
