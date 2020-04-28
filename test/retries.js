@@ -54,7 +54,10 @@ describe('# retries', () => {
 
         const api = new FetchAPI({
             baseUrl: 'https://test.ambassify.eu',
-            retry: 3
+            retry: {
+                isOK: r => r.status < 500,
+                retries: 3,
+            }
         });
 
         const fixt_error = {

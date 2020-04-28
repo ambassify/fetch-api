@@ -41,12 +41,7 @@ function getRetryConfig(retry) {
     if (!retry || typeof retry !== 'object')
         return false;
 
-    return {
-        retries: 3,
-        delay: 10,
-        isOK: r => r.status < 500,
-        ...retry
-    };
+    return retry;
 }
 
 function createFetch(options = {}) {
