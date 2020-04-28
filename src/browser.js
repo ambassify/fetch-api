@@ -1,9 +1,9 @@
-const fetch = require('@ambassify/fetch');
+const createFetch = require('./fetch');
 const FetchApi = require('./core');
 
 class BrowserFetchApi extends FetchApi {
     constructor(options = {}) {
-        options.fetch = options.fetch || fetch;
+        options.fetch = createFetch(options);
         super(options);
     }
 }
