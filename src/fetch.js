@@ -8,18 +8,20 @@ function getFetchQueuedGroup(concurrency, fetch) {
     const { group, size, merge = 'min' } = concurrency;
 
     if (!group)
-        return new FetchQueued(size, { fetch });
+        return new FetchQueued(size, { fetch }).fetch;
 
     if (!queuedGroups[group]) {
         queuedGroups[group] = new FetchQueued(size, { fetch });
     }
 
+    const instance = queuedGroups[group];
+
     if (Math[merge]) {
-        const newSize = Math[merge](queuedGroups.size, size);
-        queuedGroups.resize(newSize);
+        const newSize = Math[merge](instance.size, size);
+        instance.resize(newSize);
     }
 
-    return queuedGroups[group].fetch;
+    return instance.fetch;
 }
 
 function getConcurrencyConfig(concurrency) {
