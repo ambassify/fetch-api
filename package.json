@@ -41,14 +41,6 @@
     "es6-error": "^4.0.2",
     "qs": "^6.4.0"
   },
-  "babel": {
-    "presets": [
-      "latest"
-    ],
-    "plugins": [
-      "transform-runtime"
-    ]
-  },
   "devDependencies": {
     "babel-cli": "^6.24.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
