@@ -1,3 +1,4 @@
+const createFetch = require('./fetch');
 const { FetchApiError, RequestFailedError } = require('./error');
 const { concat, injectQueryParams } = require('./url');
 
@@ -59,7 +60,6 @@ function transformResponse(res) {
 class FetchApi {
     constructor(options = {}) {
         const {
-            fetch,
             fetchOptions = {},
             baseUrl,
             headers,
@@ -67,10 +67,7 @@ class FetchApi {
             deserialize = true,
         } = options;
 
-        if (!fetch)
-            throw new FetchApiError('FetchApi requires fetch');
-
-        this.fetch = fetch;
+        this.fetch = createFetch(options);
         this.fetchOptions = fetchOptions;
         this.baseUrl = baseUrl;
 

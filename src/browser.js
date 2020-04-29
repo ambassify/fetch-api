@@ -1,11 +1,5 @@
-const createFetch = require('./fetch');
 const FetchApi = require('./core');
 
-class BrowserFetchApi extends FetchApi {
-    constructor(options = {}) {
-        options.fetch = createFetch(options);
-        super(options);
-    }
-}
+class BrowserFetchApi extends FetchApi {}
 
 module.exports = BrowserFetchApi;
